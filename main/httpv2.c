@@ -6,6 +6,7 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 #include <esp_http_server.h>
+#include "esp_smartconfig.h"
 
 #include "esp_wifi.h"
 #include "esp_event.h"
@@ -27,7 +28,7 @@
 
 #define ESP_WIFI_SSID "iPhone (Robert)"
 #define ESP_WIFI_PASSWORD "1234567q"
-#define ESP_MAXIMUM_RETRY 5
+#define ESP_MAXIMUM_RETRY 10
 
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
@@ -37,12 +38,12 @@ static EventGroupHandle_t s_wifi_event_group;
  * - we failed to connect after the maximum amount of retries */
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
+
 #define TAG "f"
 static int s_retry_num = 0;
 int wifi_connect_status = 0;
 
 TaskHandle_t pms3003 = NULL;
-
 
 
 static void event_handler(void *arg, esp_event_base_t event_base,
@@ -101,6 +102,8 @@ void connect_wifi(void)
                                                         &event_handler,
                                                         NULL,
                                                         &instance_got_ip));
+     ESP_ERROR_CHECK( esp_event_handler_register(SC_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL) );
+
 
     wifi_config_t wifi_config = {
         .sta = {
