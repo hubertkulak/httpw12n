@@ -12,3 +12,5 @@ void water(void *arg);
 void init_adc(void);
 
 void adc_calibration_init(void);
+
+float rvoltage();

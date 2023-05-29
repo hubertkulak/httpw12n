@@ -5,9 +5,10 @@
 double temp = 1.5;
 double press = 1.5;
 double hum = 1.5;
+double light = 1.5;
 int state = 0;
 
-
+#define HTTPD_TASK_STACK_SIZE   (4096 * 2)
 
 
 char html_page[] = "<!DOCTYPE HTML><html>\n"
@@ -29,6 +30,7 @@ char html_page[] = "<!DOCTYPE HTML><html>\n"
                    "    .card.pm25 { color: #0e7c7b; }\n"
                    "    .card.pm10 { color: #17bebb; }\n"
                    "    .card.pm1 { color: #3fca6b; }\n"
+                   "    .card.light { color: #3fca6b; }\n"
                    "    .card.gas { color: #d62246; }\n"
                    "  </style>\n"
                    "  <script>\n"
@@ -53,6 +55,9 @@ char html_page[] = "<!DOCTYPE HTML><html>\n"
                    "      </div>\n"
                    "      <div class=\"card pm1\">\n"
                    "        <h4><i class=\"fas fa-globe-europe\"></i> PM1</h4><p><span class=\"reading\">%.2f ug/m3</span></p>\n"
+                   "      </div>\n"
+                   "      <div class=\"card light\">\n"
+                   "        <h4><i class=\"fas fa-globe-europe\"></i> Light</h4><p><span class=\"reading\">%.2f mV</span></p>\n"
                    "      </div>\n"
                    "  <div class=\"card\">\n"
                    "        <h4><i class=\"fas fa-toggle-on\"></i> Sterowanie</h4>\n"
@@ -84,12 +89,12 @@ esp_err_t send_web_page(httpd_req_t *req)
     temp =  rpm25();
     hum = rpm10();
     press = rpm1();
-
+    light = rvoltage();
     int response;
 
-    char response_data[sizeof(html_page) + 50];
+    char response_data[sizeof(html_page) + 100];
     memset(response_data, 0, sizeof(response_data));
-    sprintf(response_data, html_page, temp, hum, press);
+    sprintf(response_data, html_page, temp, hum, press, light);
     response = httpd_resp_send(req, response_data, HTTPD_RESP_USE_STRLEN);
 
 
@@ -118,6 +123,7 @@ httpd_uri_t toggle_uri = {
 httpd_handle_t setup_server(void)
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    config.stack_size = HTTPD_TASK_STACK_SIZE;
     httpd_handle_t server = NULL;
 
 

@@ -9,7 +9,7 @@ esp_adc_cal_characteristics_t adc_chars;
 
 #define ADC_EXAMPLE_CALI_SCHEME     ESP_ADC_CAL_VAL_EFUSE_VREF
 
-
+uint32_t voltage = 0;
 
 void adc_calibration_init(void)
 {
@@ -41,13 +41,18 @@ void init_adc(void){
 void water(void *arg)
 {
 
- uint32_t voltage = 0;
+
 
    for(;;){
     uint32_t reading = adc1_get_raw(ADC1_EXAMPLE_CHAN0);
     voltage = esp_adc_cal_raw_to_voltage(reading, &adc_chars);
     printf("\ncali data: %ld mV\n", voltage);
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(2000));
    }
 
+}
+
+float rvoltage()
+{
+  return voltage;
 }

@@ -44,6 +44,7 @@ static int s_retry_num = 0;
 int wifi_connect_status = 0;
 
 TaskHandle_t pms3003 = NULL;
+TaskHandle_t lightss = NULL;
 
 
 
@@ -171,9 +172,9 @@ void app_main()
     {
         setup_server();
         xTaskCreate(read_pms3003, "read pms3003", 4096, NULL, 1, &pms3003);
-        xTaskCreate(water, "INPUT LEVEL",2048,NULL,1, NULL);
+        xTaskCreate(water, "INPUT LEVEL",4096,NULL,2, &lightss);
         ESP_LOGI(TAG, "BME280 Web Server is up and running\n");
     }
-    else 
+    else
         ESP_LOGI(TAG, "Failed to connected with Wi-Fi, check your network Credentials\n");
       }
