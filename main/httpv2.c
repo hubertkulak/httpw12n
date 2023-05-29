@@ -21,7 +21,7 @@
 #include <lwip/netdb.h>
 
 #include "wifi.h"
-
+#include "adc.h"
 
 
 #define TAG_BME280 "BME280"
@@ -44,6 +44,7 @@ static int s_retry_num = 0;
 int wifi_connect_status = 0;
 
 TaskHandle_t pms3003 = NULL;
+
 
 
 static void event_handler(void *arg, esp_event_base_t event_base,
@@ -161,7 +162,7 @@ void app_main()
     }
     ESP_ERROR_CHECK(ret);
 
-   
+
 
     ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
     connect_wifi();
@@ -169,11 +170,10 @@ void app_main()
     if (wifi_connect_status)
     {
         setup_server();
-        xTaskCreate(read_pms3003, "read pms3003", 4096, NULL, 10, pms3003);
+        xTaskCreate(read_pms3003, "read pms3003", 4096, NULL, 1, &pms3003);
+        xTaskCreate(water, "INPUT LEVEL",2048,NULL,1, NULL);
         ESP_LOGI(TAG, "BME280 Web Server is up and running\n");
     }
-    else
+    else 
         ESP_LOGI(TAG, "Failed to connected with Wi-Fi, check your network Credentials\n");
-
-    
-}
+      }

@@ -1,8 +1,11 @@
 #include "wifi.h"
+#include <driver/gpio.h>
+#define LED_PIN GPIO_NUM_2
 
 double temp = 1.5;
 double press = 1.5;
 double hum = 1.5;
+int state = 0;
 
 
 
@@ -28,6 +31,13 @@ char html_page[] = "<!DOCTYPE HTML><html>\n"
                    "    .card.pm1 { color: #3fca6b; }\n"
                    "    .card.gas { color: #d62246; }\n"
                    "  </style>\n"
+                   "  <script>\n"
+                   "    function togglePin() {\n"
+                   "      var xhr = new XMLHttpRequest();\n"
+                   "      xhr.open('GET', '/toggle', true);\n"
+                   "      xhr.send();\n"
+                   "    }\n"
+                   "  </script>\n"
                    "</head>\n"
                    "<body>\n"
                    "  <div class=\"topnav\">\n"
@@ -44,30 +54,45 @@ char html_page[] = "<!DOCTYPE HTML><html>\n"
                    "      <div class=\"card pm1\">\n"
                    "        <h4><i class=\"fas fa-globe-europe\"></i> PM1</h4><p><span class=\"reading\">%.2f ug/m3</span></p>\n"
                    "      </div>\n"
+                   "  <div class=\"card\">\n"
+                   "        <h4><i class=\"fas fa-toggle-on\"></i> Sterowanie</h4>\n"
+                   "        <button onclick=\"togglePin()\">Toggle pin</button>\n"
+                   "      </div>\n"
                    "    </div>\n"
                    "  </div>\n"
                    "</body>\n"
                    "</html>";
 
+esp_err_t toggle_handler(httpd_req_t *req)
+{
+
+    state = !state;
+    gpio_set_level(LED_PIN, state); // Toggle LED_PIN
+    httpd_resp_sendstr(req, state ? "LED ON" : "LED OFF");
+    return ESP_OK;
+}
+
+
+
 esp_err_t send_web_page(httpd_req_t *req)
 {
 
-    
 
-    //read_pms3003();    
+
+    //read_pms3003();
 
     temp =  rpm25();
     hum = rpm10();
     press = rpm1();
 
     int response;
-    
+
     char response_data[sizeof(html_page) + 50];
     memset(response_data, 0, sizeof(response_data));
     sprintf(response_data, html_page, temp, hum, press);
     response = httpd_resp_send(req, response_data, HTTPD_RESP_USE_STRLEN);
 
-        
+
 
     return response;
 }
@@ -83,15 +108,31 @@ httpd_uri_t uri_get = {
     .handler = get_req_handler,
     .user_ctx = NULL};
 
+httpd_uri_t toggle_uri = {
+    .uri = "/toggle",
+    .method = HTTP_GET,
+    .handler = toggle_handler,
+    .user_ctx = NULL};
+
+
 httpd_handle_t setup_server(void)
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     httpd_handle_t server = NULL;
 
+
+
     if (httpd_start(&server, &config) == ESP_OK)
     {
+        printf("init uarta");
         httpd_register_uri_handler(server, &uri_get);
-        init_pms(); //incjalizacja czujnika
+        httpd_register_uri_handler(server, &toggle_uri);
+        init_adc();
+        init_pms();
+        gpio_reset_pin(LED_PIN);
+        gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);
+        gpio_set_level(LED_PIN, 0);
+         //incjalizacja czujnika
     }
 
     return server;

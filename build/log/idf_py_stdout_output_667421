@@ -1,0 +1,85 @@
+[1/10] Performing build step for 'bootloader'
+[1/1] cd /home/hubertkulak/esp/esp-idf/httpw12n/build/bootloader/esp-idf/esptool_py && /home/hubertkulak/.espressif/python_env/idf5.1_py3.10_env/bin/python /home/hubertkulak/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/hubertkulak/esp/esp-idf/httpw12n/build/bootloader/bootloader.bin
+Bootloader binary size 0x67a0 bytes. 0x860 bytes (7%) free.
+[2/8] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/pms3003.c.obj
+/home/hubertkulak/esp/esp-idf/httpw12n/main/pms3003.c: In function 'read_pms3003':
+/home/hubertkulak/esp/esp-idf/httpw12n/main/pms3003.c:47:9: warning: unused variable 'frame_count' [-Wunused-variable]
+   47 |     int frame_count = 0;
+      |         ^~~~~~~~~~~
+[3/8] Linking C static library esp-idf/main/libmain.a
+[4/8] Generating ld/sections.ld
+[5/8] Linking CXX executable httpv2.elf
+[6/8] Generating binary image from built executable
+esptool.py v4.5.1
+Creating esp32 image...
+Merged 25 ELF sections
+Successfully created esp32 image.
+Generated /home/hubertkulak/esp/esp-idf/httpw12n/build/httpv2.bin
+[7/8] cd /home/hubertkulak/esp/esp-idf/httpw12n/build/esp-idf/esptool_py && /home/hubertkulak/.espressif/python_env/idf5.1_py3.10_env/bin/python /home/hubertkulak/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/hubertkulak/esp/esp-idf/httpw12n/build/partition_table/partition-table.bin /home/hubertkulak/esp/esp-idf/httpw12n/build/httpv2.bin
+httpv2.bin binary size 0xcbf10 bytes. Smallest app partition is 0x100000 bytes. 0x340f0 bytes (20%) free.
+[7/8] cd /home/hubertkulak/esp/esp-idf/components/esptool_py && /home/hubertkulak/.espressif/tools/cmake/3.24.0/bin/cmake -D IDF_PATH=/home/hubertkulak/esp/esp-idf -D "SERIAL_TOOL=/home/hubertkulak/.espressif/python_env/idf5.1_py3.10_env/bin/python;;/home/hubertkulak/esp/esp-idf/components/esptool_py/esptool/esptool.py;--chip;esp32" -D "SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args" -D WORKING_DIRECTORY=/home/hubertkulak/esp/esp-idf/httpw12n/build -P /home/hubertkulak/esp/esp-idf/components/esptool_py/run_serial_tool.cmake
+esptool esp32 -p /dev/ttyUSB0 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 httpv2.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.5.1
+Serial port /dev/ttyUSB0
+Connecting......
+Chip is ESP32-D0WD-V3 (revision v3.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: c8:f0:9e:f8:89:30
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x000dbfff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 26528 bytes to 16594...
+Writing at 0x00001000... (50 %)
+Writing at 0x0000767d... (100 %)
+Wrote 26528 bytes (16594 compressed) at 0x00001000 in 0.9 seconds (effective 247.9 kbit/s)...
+Hash of data verified.
+Compressed 835344 bytes to 530224...
+Writing at 0x00010000... (3 %)
+Writing at 0x0001c6a1... (6 %)
+Writing at 0x00027c8e... (9 %)
+Writing at 0x0002e4ad... (12 %)
+Writing at 0x00034edd... (15 %)
+Writing at 0x0003d1fe... (18 %)
+Writing at 0x00042b89... (21 %)
+Writing at 0x00048723... (24 %)
+Writing at 0x0004e210... (27 %)
+Writing at 0x00053cef... (30 %)
+Writing at 0x00059af2... (33 %)
+Writing at 0x0005f304... (36 %)
+Writing at 0x0006461f... (39 %)
+Writing at 0x00069cda... (42 %)
+Writing at 0x0006eec4... (45 %)
+Writing at 0x0007482a... (48 %)
+Writing at 0x00079e6a... (51 %)
+Writing at 0x0007f5ed... (54 %)
+Writing at 0x00085596... (57 %)
+Writing at 0x0008aaa1... (60 %)
+Writing at 0x0009035f... (63 %)
+Writing at 0x00095bb6... (66 %)
+Writing at 0x0009b2c6... (69 %)
+Writing at 0x000a0a44... (72 %)
+Writing at 0x000a654e... (75 %)
+Writing at 0x000ac7d9... (78 %)
+Writing at 0x000b2aa1... (81 %)
+Writing at 0x000b8149... (84 %)
+Writing at 0x000c0a33... (87 %)
+Writing at 0x000c909a... (90 %)
+Writing at 0x000cef1e... (93 %)
+Writing at 0x000d4aa1... (96 %)
+Writing at 0x000d9d36... (100 %)
+Wrote 835344 bytes (530224 compressed) at 0x00010000 in 12.1 seconds (effective 554.6 kbit/s)...
+Hash of data verified.
+Compressed 3072 bytes to 103...
+Writing at 0x00008000... (100 %)
+Wrote 3072 bytes (103 compressed) at 0x00008000 in 0.0 seconds (effective 631.8 kbit/s)...
+Hash of data verified.
+
+Leaving...
+Hard resetting via RTS pin...
