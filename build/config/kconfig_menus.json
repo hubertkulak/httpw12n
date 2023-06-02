@@ -4352,6 +4352,44 @@
     {
         "children": [
             {
+                "children": [],
+                "depends_on": null,
+                "help": "SSID (network name) for the example to connect to.",
+                "id": "ESP_WIFI_SSID",
+                "name": "ESP_WIFI_SSID",
+                "range": null,
+                "title": "WiFi SSID",
+                "type": "string"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": "WiFi password (WPA or WPA2) for the example to use.",
+                "id": "ESP_WIFI_PASSWORD",
+                "name": "ESP_WIFI_PASSWORD",
+                "range": null,
+                "title": "WiFi Password",
+                "type": "string"
+            },
+            {
+                "children": [],
+                "depends_on": null,
+                "help": "Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.",
+                "id": "ESP_MAXIMUM_RETRY",
+                "name": "ESP_MAXIMUM_RETRY",
+                "range": null,
+                "title": "Maximum retry",
+                "type": "int"
+            }
+        ],
+        "depends_on": null,
+        "id": "wifi-credentials-configuration",
+        "title": "Wifi Credentials Configuration",
+        "type": "menu"
+    },
+    {
+        "children": [
+            {
                 "children": [
                     {
                         "children": [],

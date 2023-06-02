@@ -26,10 +26,9 @@
 
 #define TAG_BME280 "BME280"
 
-#define ESP_WIFI_SSID "iPhone (Robert)"
-#define ESP_WIFI_PASSWORD "1234567q"
-#define ESP_MAXIMUM_RETRY 10
-
+#define ESP_WIFI_SSID CONFIG_ESP_WIFI_SSID
+#define ESP_WIFI_PASSWORD CONFIG_ESP_WIFI_PASSWORD
+#define ESP_MAXIMUM_RETRY CONFIG_ESP_MAXIMUM_RETRY
 /* FreeRTOS event group to signal when we are connected*/
 static EventGroupHandle_t s_wifi_event_group;
 
