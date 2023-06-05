@@ -2,10 +2,16 @@
 #include <driver/gpio.h>
 #define LED_PIN GPIO_NUM_2
 
+
 double temp = 1.5;
 double press = 1.5;
 double hum = 1.5;
 double light = 1.5;
+double bme_temp = 1;
+double bme_press = 1;
+double bme_humi = 1;;
+int tvoc = 1;
+int eco2 = 1;
 int state = 0;
 
 #define HTTPD_TASK_STACK_SIZE   (4096 * 2)
@@ -32,6 +38,11 @@ char html_page[] = "<!DOCTYPE HTML><html>\n"
                    "    .card.pm1 { color: #3fca6b; }\n"
                    "    .card.light { color: #3fca6b; }\n"
                    "    .card.gas { color: #d62246; }\n"
+                   "    .card.temperature { color: #3dca6b; }\n"
+                   "    .card.pressure { color: #3eca6b; }\n"
+                   "    .card.humidity { color: #3fca6b; }\n"
+                   "    .card.eTVOC { color: #30ca6b; }\n"
+                   "    .card.eCO2 { color: #3fc26b; }\n"
                    "  </style>\n"
                    "  <script>\n"
                    "    function togglePin() {\n"
@@ -59,6 +70,22 @@ char html_page[] = "<!DOCTYPE HTML><html>\n"
                    "      <div class=\"card light\">\n"
                    "        <h4><i class=\"fas fa-globe-europe\"></i> Light</h4><p><span class=\"reading\">%.2f mV</span></p>\n"
                    "      </div>\n"
+					"	  <div class=\"card temperature\">\n"
+                   "        <h4><i class=\"fas fa-globe-europe\"></i> Temperature</h4><p><span class=\"reading\">%.2f C</span></p>\n"
+                   "      </div>\n"
+					"	 <div class=\"card pressure\">\n"
+                   "        <h4><i class=\"fas fa-globe-europe\"></i> Pressure</h4><p><span class=\"reading\">%.2f Pa</span></p>\n"
+                   "      </div>\n"
+					" <div class=\"card humidity\">\n"
+                   "        <h4><i class=\"fas fa-globe-europe\"></i> Humidity</h4><p><span class=\"reading\">%.2f RH</span></p>\n"
+                   "      </div>\n"
+					" <div class=\"card eTVOC\">\n"
+                   "        <h4><i class=\"fas fa-globe-europe\"></i> eTVOC</h4><p><span class=\"reading\">%d ppb</span></p>\n"
+                   "      </div>\n"
+                    " <div class=\"card eCO2\">\n"
+                   "        <h4><i class=\"fas fa-globe-europe\"></i> eCO2</h4><p><span class=\"reading\">%d ppm</span></p>\n"
+                   "      </div>\n"
+
                    "  <div class=\"card\">\n"
                    "        <h4><i class=\"fas fa-toggle-on\"></i> Sterowanie</h4>\n"
                    "        <button onclick=\"togglePin()\">Toggle pin</button>\n"
@@ -90,11 +117,17 @@ esp_err_t send_web_page(httpd_req_t *req)
     hum = rpm10();
     press = rpm1();
     light = rvoltage();
-    int response;
+    bme_temp = (double) getTemp() /100.0f;
+	bme_press = (double) getPressure() / 100000.0f;
+	bme_humi = (double) getHumid() / 100.0f;
+	tvoc = getTvoc();
+	eco2 = getCO2();
+
+	int response;
 
     char response_data[sizeof(html_page) + 100];
     memset(response_data, 0, sizeof(response_data));
-    sprintf(response_data, html_page, temp, hum, press, light);
+    sprintf(response_data, html_page, temp, hum, press, light, bme_temp, bme_press, bme_humi, tvoc, eco2);
     response = httpd_resp_send(req, response_data, HTTPD_RESP_USE_STRLEN);
 
 
@@ -135,7 +168,8 @@ httpd_handle_t setup_server(void)
         httpd_register_uri_handler(server, &toggle_uri);
         init_adc();
         init_pms();
-        gpio_reset_pin(LED_PIN);
+        init_both(); //bme280 + sgp30 init
+		gpio_reset_pin(LED_PIN);
         gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);
         gpio_set_level(LED_PIN, 0);
          //incjalizacja czujnika

@@ -18,6 +18,8 @@
 
 #include "pms3003.h"
 #include "adc.h"
+#include "i2c_config.h"
+#include "sgpbme.h"
 
 httpd_handle_t setup_server(void);
 esp_err_t get_req_handler(httpd_req_t *req);
