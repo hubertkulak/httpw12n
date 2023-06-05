@@ -15,4 +15,11 @@ int my_bme280_init(void);
 //void task_bme280_normal_mode(int com_rslt);
 void task_bme280_normal_mode();
 void main_task_sgp(void *arg);
+void init_both();
 void read_both();
+
+long int getTemp();
+long int getHumid();
+long int getPressure();
+int getTvoc();
+int getCO2();

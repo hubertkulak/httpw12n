@@ -166,7 +166,8 @@ httpd_handle_t setup_server(void)
         printf("init uarta");
         httpd_register_uri_handler(server, &uri_get);
         httpd_register_uri_handler(server, &toggle_uri);
-        init_adc();
+        i2c_master_driver_initialize();
+		init_adc();
         init_pms();
         init_both(); //bme280 + sgp30 init
 		gpio_reset_pin(LED_PIN);
