@@ -32,7 +32,7 @@ cd ~/esp/esp-idf
 make sure to export the environmental variables.
 
 ```console
-./export.sh
+. ./export.sh
 ```
 
 ### Build our project
