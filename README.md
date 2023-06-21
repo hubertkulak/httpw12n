@@ -6,6 +6,10 @@ ESP32 esp-idf web-server project
 
 ### Set up the esp-idf toolchain
 
+NOTE: The ESP-IDF build system does not support spaces in the paths to either ESP-IDF or to projects.
+
+#### Linux
+
 esp-idf setup src: <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/linux-macos-setup.html>
 
 First, install all dependencies.
@@ -35,9 +39,13 @@ make sure to export the environmental variables.
 . ./export.sh
 ```
 
+#### Windows
+
+follow the installation process from here: <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/windows-setup.html>
+
 ### Build our project
 
-Create projects direcory (in `/esp-idf`) 
+Create projects direcory (in `/esp-idf`)
 
 ```console
 mkdir projects && cd projects
@@ -53,7 +61,7 @@ git clone https://github.com/hubertkulak/httpw12n
 
 Before building make sure to set up your wifi credentials in sdkconfig file
 
-```
+```console
 CONFIG_ESP_WIFI_SSID="name_of_your_network"
 CONFIG_ESP_WIFI_PASSWORD="password_to_it"
 ```
@@ -67,23 +75,18 @@ cd projects/httpw12n
 idf.py build
 ````
 
-note: building for the first time may take a while since all of the esp-idf tools  are also building.
+note: building for the first time may take a while since all of the esp-idf tools  are also building. If fails enter ```idf.py set-target esp32``` and try again.
 
-#### Flash the device
+#### Flashing the device
 
-The port should be `/dev/ttyUSB0`. If not, change accordingly.
+On linux the port should be `/dev/ttyUSB0` If not, change accordingly.
+On windows it will be one of the ```COM``` ports.  
 
 ```console
 idf.py -p /dev/ttyUSB0 flash
 ```
 
-note: For some reason (mostly in ubuntu based systems) esp-idf may not be able to detect the connection. If so, try:
-
-```console
-sudo chmod 0777 /dev/ttyUSB0
-```
-
-and flash again.
+note: For some reason (mostly in ubuntu based systems) esp-idf may not be able to detect the connection. If so, try: ``sudo chmod 0777 /dev/ttyUSB0`` and flash again.
 
 #### Read the IP address of the website
 
@@ -97,4 +100,4 @@ idf.py monitor
 
 #### Connect to the webstie
 
-Enter the IP address into your web browser. Make sure to be connected to the same wi-fi as the ESP!
+Enter the IP address into your web browser. Make sure to be connected to the same wi-fi as the ESP! (If for some reason ESP does not connect, reflash the board)
