@@ -1,17 +1,31 @@
 #include <stdio.h>
 #include "i2c_config.h"
 
-esp_err_t i2c_master_driver_initialize(void) {
-//    int i2c_master_port = I2C_MASTER_NUM; 
-//    int i2c_master_port = I2C_MASTER_NUM;
+esp_err_t i2c_master_driver_initialize_SGP(void) {
+     i2c_config_t conf;
+
+     conf.mode = I2C_MODE_MASTER;
+     conf.sda_io_num = SDA_PIN_S;
+     conf.scl_io_num = SCL_PIN_S;
+     conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
+     conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
+     conf.master.clk_speed = 20000;//I2C_MASTER_FREQ_HZ;
+     conf.clk_flags = 0;
+
+     i2c_param_config(I2C_NUM_1, &conf);
+    // i2c_param_config(i2c_master_port, &conf);
+     return i2c_driver_install(I2C_NUM_1, I2C_MODE_MASTER, 0, 0, 0);
+
+}
+esp_err_t i2c_master_driver_initialize_BME(void) {
 	i2c_config_t conf;
 
     conf.mode = I2C_MODE_MASTER;
-    conf.sda_io_num = SDA_PIN;
-    conf.scl_io_num = SCL_PIN;
+    conf.sda_io_num = SDA_PIN_B;
+    conf.scl_io_num = SCL_PIN_B;
     conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
     conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
-    conf.master.clk_speed = 50000;//I2C_MASTER_FREQ_HZ;
+    conf.master.clk_speed = 20000;//I2C_MASTER_FREQ_HZ;
 	conf.clk_flags = 0;
 
     i2c_param_config(I2C_NUM_0, &conf);
@@ -46,7 +60,7 @@ int8_t main_i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *in
     i2c_master_read_byte(cmd, reg_data + len - 1, NACK_VAL);
     i2c_master_stop(cmd);
 
-    ret = i2c_master_cmd_begin(i2c_num_KURWA, cmd, 1000 / portTICK_PERIOD_MS);
+    ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_PERIOD_MS);
     
     i2c_cmd_link_delete(cmd);
     
@@ -69,7 +83,7 @@ int8_t main_i2c_write(uint8_t reg_addr, uint8_t *reg_data, uint32_t len, void *i
     i2c_master_write(cmd, reg_data, len, ACK_CHECK_EN);
     i2c_master_stop(cmd);
 
-    ret = i2c_master_cmd_begin(i2c_num_KURWA, cmd, 1000 / portTICK_PERIOD_MS);
+    ret = i2c_master_cmd_begin(i2c_num, cmd, 1000 / portTICK_PERIOD_MS);
     
     i2c_cmd_link_delete(cmd);
     
@@ -132,4 +146,3 @@ int8_t user_i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint
 
   return (int8_t)iError;
 }
-

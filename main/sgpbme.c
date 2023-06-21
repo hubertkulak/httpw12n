@@ -2,7 +2,7 @@
 #include "i2c_config.h"
 #include "SGP30.h"
 #include "bme280.h"
-
+#include <math.h>
 
 struct bme280_dev bme280;
 struct bme280_data sensdata;
@@ -16,6 +16,8 @@ void user_delay_ms(uint32_t ms)
 
 int my_bme280_init(void)
 {
+	
+  i2c_master_driver_initialize_BME();
   int8_t rslt = BME280_OK;
   uint8_t settings_sel;
   
@@ -28,8 +30,8 @@ int my_bme280_init(void)
   rslt = bme280_init(&bme280);
   printf("bme280 init result %d\r\n", rslt);
 
-  bme280.settings.osr_h = BME280_OVERSAMPLING_1X;
-  bme280.settings.osr_p = BME280_OVERSAMPLING_4X;
+  bme280.settings.osr_h = BME280_OVERSAMPLING_4X;
+  bme280.settings.osr_p = BME280_OVERSAMPLING_8X;
   bme280.settings.osr_t = BME280_OVERSAMPLING_4X;
   bme280.settings.filter = BME280_FILTER_COEFF_OFF;
   settings_sel = BME280_OSR_PRESS_SEL | BME280_OSR_TEMP_SEL | BME280_OSR_HUM_SEL | BME280_FILTER_SEL;
@@ -54,7 +56,17 @@ void task_bme280_normal_mode() {
 
       com_rslt = bme280_get_sensor_data(BME280_ALL, &sensdata ,&bme280);
       if (com_rslt == SUCCESS) {
-        printf("kurwa jebana mowi: %ld degC / %ld hPa / %ld wilgotnosc \n", sensdata.temperature, sensdata.pressure, sensdata.humidity);
+   			//long int p = sensdata.pressure - 10000000 + 1000000;
+			//long int pi = p / 1000;
+			//long int pd = p - pi * 100;
+			
+			float altitude = pow(1013.25f / getPressure(), 0.190234f) - 1;
+			altitude *= ((15.0f + 273.15f) / 0.0065f);
+
+			printf("odczyt: %.2f degC / %.2f hPa / %.2f wilgotnosc \n", getTemp(), getPressure(), getHumid());
+		//	printf("pressure wartosci: z czujnika %ld p %ld pi %ld pd %ld\n", sensdata.pressure, p, pi, pd);
+			
+			printf("alti %.5f\n", altitude);
 		 } else {
 			printf("measure error. code: %d", com_rslt);
       }
@@ -65,39 +77,15 @@ void task_bme280_normal_mode() {
 
   vTaskDelete(NULL);
 }
-void main_task_sgp(void *arg) {
+
+void init_sgp(){
+	i2c_master_driver_initialize_SGP();
     printf("SGP30 main task initializing...");
 
-    //sgp30_dev_t main_sgp30_sensor;
+    sgp30_init(&main_sgp30_sensor, (sgp30_read_fptr_t)main_i2c_read, (sgp30_write_fptr_t)main_i2c_write);
 
-//    sgp30_init(&main_sgp30_sensor, (sgp30_read_fptr_t)main_i2c_read, (sgp30_write_fptr_t)main_i2c_write);
-//
-//    // SGP30 needs to be read every 1s and sends TVOC = 400 14 times when initializing
-//    for (int i = 0; i < 14; i++) {
-//        vTaskDelay(1000 / portTICK_PERIOD_MS);
-//        sgp30_IAQ_measure(&main_sgp30_sensor);
-//        printf("SGP30 Calibrating... TVOC: %d,  eCO2: %d\n",  main_sgp30_sensor.TVOC, main_sgp30_sensor.eCO2);
-//    }
-//
-//    // Read initial baselines 
-//    uint16_t eco2_baseline, tvoc_baseline;
-//    sgp30_get_IAQ_baseline(&main_sgp30_sensor, &eco2_baseline, &tvoc_baseline);
-//    printf("BASELINES - TVOC: %d,  eCO2: %d\n",  tvoc_baseline, eco2_baseline);
-//
-//
-//    printf("SGP30 main task is running...");
-//    while(1) {
-//        vTaskDelay(2000 / portTICK_PERIOD_MS);
-//        sgp30_IAQ_measure(&main_sgp30_sensor);
-//
-//        printf("TVOC: %d,  eCO2: %d\n",  main_sgp30_sensor.TVOC, main_sgp30_sensor.eCO2);
-//    }
-}
-
-void init_both()
-{	
-	sgp30_init(&main_sgp30_sensor, (sgp30_read_fptr_t)user_i2c_read, (sgp30_write_fptr_t)user_i2c_write);
-	for (int i = 0; i < 14; i++) {
+    // SGP30 needs to be read every 1s and sends TVOC = 400 14 times when initializing
+    for (int i = 0; i < 14; i++) {
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         sgp30_IAQ_measure(&main_sgp30_sensor);
         printf("SGP30 Calibrating... TVOC: %d,  eCO2: %d\n",  main_sgp30_sensor.TVOC, main_sgp30_sensor.eCO2);
@@ -108,60 +96,32 @@ void init_both()
     sgp30_get_IAQ_baseline(&main_sgp30_sensor, &eco2_baseline, &tvoc_baseline);
     printf("BASELINES - TVOC: %d,  eCO2: %d\n",  tvoc_baseline, eco2_baseline);
 
-	my_bme280_init();	
 }
 
-void read_both()
-{
-//	
-//	sgp30_init(&main_sgp30_sensor, (sgp30_read_fptr_t)user_i2c_read, (sgp30_write_fptr_t)user_i2c_write);
-//	 for (int i = 0; i < 14; i++) {
-//        vTaskDelay(1000 / portTICK_PERIOD_MS);
-//        sgp30_IAQ_measure(&main_sgp30_sensor);
-//        printf("SGP30 Calibrating... TVOC: %d,  eCO2: %d\n",  main_sgp30_sensor.TVOC, main_sgp30_sensor.eCO2);
-//    }
-//
-//    // Read initial baselines 
-//    uint16_t eco2_baseline, tvoc_baseline;
-//    sgp30_get_IAQ_baseline(&main_sgp30_sensor, &eco2_baseline, &tvoc_baseline);
-//    printf("BASELINES - TVOC: %d,  eCO2: %d\n",  tvoc_baseline, eco2_baseline);
-//
-//
-//	my_bme280_init();	
-	int com_rslt = bme280_set_sensor_mode(BME280_NORMAL_MODE, &bme280);
-	if (com_rslt == SUCCESS) {
-    while (true) {
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
-		com_rslt = bme280_get_sensor_data(BME280_ALL, &sensdata ,&bme280);
+void read_sgp(){
 
-		if (com_rslt == SUCCESS) {
-			//printf("kurwa jebana mowi: %ld degC / %ld hPa / %ld wilgotnosc \n", sensdata.temperature, sensdata.pressure, sensdata.humidity);
-			printf("kurwa jebana mowi: %ld degC / %ld hPa / %ld wilgotnosc \n", getTemp(), getPressure(), getHumid());
-		} else {
-			printf("measure error. code: %d", com_rslt);
-		}
-	
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
-		sgp30_IAQ_measure(&main_sgp30_sensor);
-		//printf("TVOC: %d,  eCO2: %d\n",  main_sgp30_sensor.TVOC, main_sgp30_sensor.eCO2);
-		printf("TVOC: %d,  eCO2: %d\n",  getTvoc(), getCO2());
-	}
-  
-	} else {
-    printf("init or setting error. code: %d", com_rslt);
-  }
+   printf("SGP30 main task is running...");
+    while(1) {
+        vTaskDelay(2000 / portTICK_PERIOD_MS);
+        sgp30_IAQ_measure(&main_sgp30_sensor);
 
-  vTaskDelete(NULL);
+        printf("TVOC: %d,  eCO2: %d\n",  main_sgp30_sensor.TVOC, main_sgp30_sensor.eCO2);
+    }
 }
 
-long int getTemp(){
-	return sensdata.temperature;
+float getTemp(){
+	return (float) sensdata.temperature / 100.0f;
 }
-long int getHumid(){
-	return sensdata.humidity;
+float getHumid(){
+  	int hi = sensdata.humidity / 1024;
+	int hd = sensdata.humidity * 100 / 1024 - hi * 100;
+
+	return (float) hi + (float) hd / 100.0f;
 }
-long int getPressure(){
-	return sensdata.pressure;
+float getPressure(){
+	//long int p = sensdata.pressure - 10000000 + 1000000;
+	//return (float) p / 1000.0f;
+	return (float) sensdata.pressure / 10000.0f;
 }
 int getTvoc(){
 	return main_sgp30_sensor.TVOC;
@@ -169,3 +129,4 @@ int getTvoc(){
 int getCO2(){
 	return main_sgp30_sensor.eCO2;	
 }
+
