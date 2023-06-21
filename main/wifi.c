@@ -3,13 +3,13 @@
 #define LED_PIN GPIO_NUM_2
 
 
-double temp = 1.5;
+float temp = 1.5;
 double press = 1.5;
-double hum = 1.5;
+float hum = 1.5;
 double light = 1.5;
-double bme_temp = 1;
-double bme_press = 1;
-double bme_humi = 1;;
+float bme_temp = 1;
+float bme_press = 1;
+float bme_humi = 1;;
 int tvoc = 1;
 int eco2 = 1;
 int state = 0;
@@ -74,7 +74,7 @@ char html_page[] = "<!DOCTYPE HTML><html>\n"
                    "        <h4><i class=\"fas fa-globe-europe\"></i> Temperature</h4><p><span class=\"reading\">%.2f C</span></p>\n"
                    "      </div>\n"
 					"	 <div class=\"card pressure\">\n"
-                   "        <h4><i class=\"fas fa-globe-europe\"></i> Pressure</h4><p><span class=\"reading\">%.2f Pa</span></p>\n"
+                   "        <h4><i class=\"fas fa-globe-europe\"></i> Pressure</h4><p><span class=\"reading\">%.4f Pa</span></p>\n"
                    "      </div>\n"
 					" <div class=\"card humidity\">\n"
                    "        <h4><i class=\"fas fa-globe-europe\"></i> Humidity</h4><p><span class=\"reading\">%.2f RH</span></p>\n"
@@ -109,17 +109,15 @@ esp_err_t toggle_handler(httpd_req_t *req)
 esp_err_t send_web_page(httpd_req_t *req)
 {
 
-
-
     //read_pms3003();
 
     temp =  rpm25();
     hum = rpm10();
     press = rpm1();
     light = rvoltage();
-    bme_temp = (double) getTemp() /100.0f;
-	bme_press = (double) getPressure() / 100000.0f;
-	bme_humi = (double) getHumid() / 100.0f;
+    bme_temp = getTemp(); 
+	bme_press = getPressure();
+	bme_humi = getHumid();
 	tvoc = getTvoc();
 	eco2 = getCO2();
 
@@ -166,10 +164,10 @@ httpd_handle_t setup_server(void)
         printf("init uarta");
         httpd_register_uri_handler(server, &uri_get);
         httpd_register_uri_handler(server, &toggle_uri);
-        i2c_master_driver_initialize();
 		init_adc();
         init_pms();
-        init_both(); //bme280 + sgp30 init
+		init_sgp();
+		my_bme280_init();
 		gpio_reset_pin(LED_PIN);
         gpio_set_direction(LED_PIN, GPIO_MODE_OUTPUT);
         gpio_set_level(LED_PIN, 0);

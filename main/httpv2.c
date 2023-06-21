@@ -172,7 +172,8 @@ void app_main()
         setup_server();
         xTaskCreate(read_pms3003, "read pms3003", 4096, NULL, 1, &pms3003);
         xTaskCreate(water, "INPUT LEVEL",4096,NULL,2, &lightss);
-		xTaskCreate(read_both, "read both from i2c", 4096, NULL, 10, NULL);
+		xTaskCreate(read_sgp, "read measurement sgp", 4096, NULL, 3, NULL);	
+		xTaskCreate(task_bme280_normal_mode, "read meaurement bme", 4096, NULL, 3, NULL);
 		ESP_LOGI(TAG, "BME280 Web Server is up and running\n");
     }
     else
