@@ -1,30 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h> //Requires by memset
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_spi_flash.h"
-#include <esp_http_server.h>
-#include "esp_smartconfig.h"
 
 #include "esp_wifi.h"
-#include "esp_event.h"
-#include "freertos/event_groups.h"
-#include "esp_log.h"
 #include "nvs_flash.h"
-#include "esp_netif.h"
-#include "driver/gpio.h"
-#include <lwip/sockets.h>
-#include <lwip/sys.h>
-#include <lwip/api.h>
-#include <lwip/netdb.h>
 
 #include "wifi.h"
 #include "adc.h"
 #include "sgpbme.h"
+#include "led.h"
 
 #define TAG_BME280 "BME280"
+
 
 #define ESP_WIFI_SSID CONFIG_ESP_WIFI_SSID
 #define ESP_WIFI_PASSWORD CONFIG_ESP_WIFI_PASSWORD
@@ -53,6 +40,9 @@ static void event_handler(void *arg, esp_event_base_t event_base,
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
     {
         esp_wifi_connect();
+        ledstateon(TRY_LED);
+        ledstateoff(DIS_LED);
+        ledstateoff(CON_LED);
     }
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
     {
@@ -64,10 +54,15 @@ static void event_handler(void *arg, esp_event_base_t event_base,
         }
         else
         {
+          ledstateon(DIS_LED);
+          ledstateoff(TRY_LED);
+          ledstateoff(CON_LED);
             xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+
         }
         wifi_connect_status = 0;
         ESP_LOGI(TAG, "connect to the AP fail");
+
     }
     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
     {
@@ -75,6 +70,9 @@ static void event_handler(void *arg, esp_event_base_t event_base,
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+        ledstateon(CON_LED);
+        ledstateoff(DIS_LED);
+        ledstateoff(TRY_LED);
         wifi_connect_status = 1;
     }
 }
@@ -103,7 +101,7 @@ void connect_wifi(void)
                                                         &event_handler,
                                                         NULL,
                                                         &instance_got_ip));
-     ESP_ERROR_CHECK( esp_event_handler_register(SC_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL) );
+
 
 
     wifi_config_t wifi_config = {
@@ -162,7 +160,9 @@ void app_main()
     }
     ESP_ERROR_CHECK(ret);
 
-
+    configled(TRY_LED);
+    configled(DIS_LED);
+    configled(CON_LED);
 
     ESP_LOGI(TAG, "ESP_WIFI_MODE_STA");
     connect_wifi();
@@ -172,7 +172,7 @@ void app_main()
         setup_server();
         xTaskCreate(read_pms3003, "read pms3003", 4096, NULL, 1, &pms3003);
         xTaskCreate(water, "INPUT LEVEL",4096,NULL,2, &lightss);
-		xTaskCreate(read_sgp, "read measurement sgp", 4096, NULL, 3, NULL);	
+		xTaskCreate(read_sgp, "read measurement sgp", 4096, NULL, 3, NULL);
 		xTaskCreate(task_bme280_normal_mode, "read meaurement bme", 4096, NULL, 3, NULL);
 		ESP_LOGI(TAG, "BME280 Web Server is up and running\n");
     }

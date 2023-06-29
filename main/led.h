@@ -2,8 +2,8 @@
 #include "driver/gpio.h"
 
 
-#define CON_LED 25
-#define DIS_LED 26
+#define CON_LED 26
+#define DIS_LED 25
 #define TRY_LED 27
 
 

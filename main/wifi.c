@@ -1,6 +1,6 @@
 #include "wifi.h"
 #include <driver/gpio.h>
-#define LED_PIN GPIO_NUM_2
+#define LED_PIN GPIO_NUM_13
 
 
 float temp = 1.5;
@@ -115,7 +115,7 @@ esp_err_t send_web_page(httpd_req_t *req)
     hum = rpm10();
     press = rpm1();
     light = rvoltage();
-    bme_temp = getTemp(); 
+    bme_temp = getTemp();
 	bme_press = getPressure();
 	bme_humi = getHumid();
 	tvoc = getTvoc();
