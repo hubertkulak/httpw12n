@@ -7,7 +7,7 @@ Wykorzystane czunjniki:
 - PMS3003: laserowy czujnik pyłu
 - BME280: czujnik tempertury, wilgotności i ciśnienia
 
-Na makiecie znajduje się także dioda RGB informująca o stanie serwera oraz przęczyk, którym można sterować poprzez stronę www.
+Na makiecie znajduje się także dioda RGB informująca o stanie serwera oraz przęczyk, którym można sterować poprzez stronę internetową.
 
 Po podłączeniu płytki do zasilania na ESP uruchamia się serwer ze stroną www, z której można odczytać pomiary ze wszystkich czujników.
 
